@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Description Viewer</title>
+    <title>Job Description Parser v1.1</title>
     <style>
         * {
             margin: 0;
@@ -15,9 +15,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
 
@@ -26,8 +23,8 @@
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 600px;
-            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         h1 {
@@ -36,10 +33,25 @@
             font-size: 28px;
         }
 
+        .version-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
         .subtitle {
             color: #666;
             margin-bottom: 30px;
             font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
         }
 
         .input-group {
@@ -54,7 +66,8 @@
             font-size: 14px;
         }
 
-        input[type="url"] {
+        input[type="url"],
+        input[type="text"] {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e0e0e0;
@@ -63,7 +76,8 @@
             transition: border-color 0.3s;
         }
 
-        input[type="url"]:focus {
+        input[type="url"]:focus,
+        input[type="text"]:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -96,39 +110,173 @@
             transform: none;
         }
 
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
             display: none;
         }
 
-        .result.show {
+        .error.show {
             display: block;
         }
 
-        .result h2 {
+        /* Job Viewer Section */
+        .job-viewer-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .job-viewer-section.show {
+            display: block;
+        }
+
+        .collapsible-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+            border: 2px solid #e0e0e0;
+        }
+
+        .collapsible-header:hover {
+            background: #e9ecef;
+        }
+
+        .collapsible-header h3 {
             color: #333;
-            margin-bottom: 15px;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .collapse-icon {
+            transition: transform 0.3s;
             font-size: 20px;
+            color: #667eea;
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            margin-top: 0;
+        }
+
+        .job-viewer-controls {
+            margin-bottom: 15px;
+        }
+
+        .link-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background 0.3s;
+            margin-right: 10px;
+        }
+
+        .link-button:hover {
+            background: #5568d3;
         }
 
         .url-display {
             word-break: break-all;
             color: #667eea;
-            margin-bottom: 15px;
-            font-size: 14px;
+            font-size: 12px;
+            margin-top: 10px;
         }
 
         .content-container {
             width: 100%;
-            max-height: 600px;
+            max-height: 400px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             overflow-y: auto;
             background: white;
+        }
+
+        /* ATS Analysis Section */
+        .ats-analysis-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .ats-analysis-section.show {
+            display: block;
+        }
+
+        .analysis-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 20px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .analysis-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .analysis-content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+        }
+
+        .analysis-section {
+            margin-bottom: 25px;
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .analysis-section h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .analysis-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .analysis-section li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .analysis-section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
         }
 
         .loading {
@@ -152,61 +300,82 @@
             100% { transform: rotate(360deg); }
         }
 
-        .error {
-            color: #dc3545;
-            margin-top: 10px;
+        .tip {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin-top: 20px;
+            border-radius: 4px;
             font-size: 14px;
-            display: none;
-        }
-
-        .error.show {
-            display: block;
-        }
-
-        .link-button {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .link-button:hover {
-            background: #5568d3;
+            color: #856404;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Job Description Viewer</h1>
-        <p class="subtitle">Enter the URL of a job description to view it</p>
+        <h1>
+            Job Description Parser
+            <span class="version-badge">v1.1</span>
+        </h1>
+        <p class="subtitle">Analyze job descriptions with AI to understand ATS requirements</p>
 
-        <form id="urlForm">
-            <div class="input-group">
-                <label for="jobUrl">Job Description URL</label>
-                <input
-                    type="url"
-                    id="jobUrl"
-                    placeholder="https://example.com/job-posting"
-                    required
-                >
+        <div class="input-section">
+            <form id="urlForm">
+                <div class="input-group">
+                    <label for="apiKey">Claude API Key</label>
+                    <input
+                        type="text"
+                        id="apiKey"
+                        placeholder="sk-ant-..."
+                        required
+                    >
+                </div>
+                <div class="input-group">
+                    <label for="jobUrl">Job Description URL</label>
+                    <input
+                        type="url"
+                        id="jobUrl"
+                        placeholder="https://example.com/job-posting"
+                        required
+                    >
+                </div>
+                <button type="submit" id="submitBtn">Analyze Job Description</button>
+                <div class="error" id="error"></div>
+            </form>
+            <div class="tip">
+                💡 Your API key is stored locally in your browser and never sent to any server except Anthropic's Claude API.
             </div>
-            <button type="submit" id="submitBtn">Load Job Description</button>
-            <div class="error" id="error"></div>
-        </form>
+        </div>
 
-        <div class="result" id="result">
-            <h2>Job Description</h2>
-            <div class="url-display" id="urlDisplay"></div>
-            <a href="" target="_blank" class="link-button" id="openLink">Open in New Tab</a>
-            <div class="content-container" id="contentContainer">
+        <!-- Job Viewer Section -->
+        <div class="job-viewer-section" id="jobViewerSection">
+            <div class="collapsible-header" id="jobViewerHeader">
+                <h3>📄 Original Job Posting</h3>
+                <span class="collapse-icon" id="collapseIcon">▼</span>
+            </div>
+            <div class="collapsible-content" id="jobViewerContent">
+                <div class="job-viewer-controls">
+                    <a href="" target="_blank" class="link-button" id="openLink">Open in New Tab</a>
+                    <div class="url-display" id="urlDisplay"></div>
+                </div>
+                <div class="content-container" id="contentContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading job description...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATS Analysis Section -->
+        <div class="ats-analysis-section" id="atsAnalysisSection">
+            <div class="analysis-header">
+                <h2>🤖 ATS Analysis & Breakdown</h2>
+            </div>
+            <div class="analysis-content" id="analysisContent">
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Loading job description...</p>
+                    <p>Analyzing with Claude AI...</p>
                 </div>
             </div>
         </div>
@@ -214,20 +383,48 @@
 
     <script>
         const form = document.getElementById('urlForm');
+        const apiKeyInput = document.getElementById('apiKey');
         const urlInput = document.getElementById('jobUrl');
         const submitBtn = document.getElementById('submitBtn');
-        const result = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+
+        // Job Viewer Elements
+        const jobViewerSection = document.getElementById('jobViewerSection');
+        const jobViewerHeader = document.getElementById('jobViewerHeader');
+        const jobViewerContent = document.getElementById('jobViewerContent');
+        const collapseIcon = document.getElementById('collapseIcon');
         const urlDisplay = document.getElementById('urlDisplay');
         const contentContainer = document.getElementById('contentContainer');
-        const errorDiv = document.getElementById('error');
         const openLink = document.getElementById('openLink');
 
-        form.addEventListener('submit', function(e) {
+        // ATS Analysis Elements
+        const atsAnalysisSection = document.getElementById('atsAnalysisSection');
+        const analysisContent = document.getElementById('analysisContent');
+
+        // Load saved API key
+        const savedApiKey = localStorage.getItem('claudeApiKey');
+        if (savedApiKey) {
+            apiKeyInput.value = savedApiKey;
+        }
+
+        // Collapsible functionality
+        jobViewerHeader.addEventListener('click', function() {
+            jobViewerContent.classList.toggle('collapsed');
+            collapseIcon.classList.toggle('collapsed');
+        });
+
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const apiKey = apiKeyInput.value.trim();
             const url = urlInput.value.trim();
 
-            // Validate URL
+            // Validate inputs
+            if (!apiKey) {
+                showError('Please enter your Claude API key');
+                return;
+            }
+
             try {
                 new URL(url);
             } catch (e) {
@@ -235,16 +432,32 @@
                 return;
             }
 
+            // Save API key
+            localStorage.setItem('claudeApiKey', apiKey);
+
             // Hide error
             errorDiv.classList.remove('show');
 
-            // Load the job description
-            loadJobDescription(url);
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            // Show sections
+            jobViewerSection.classList.add('show');
+            atsAnalysisSection.classList.add('show');
+
+            // Load job description and analyze
+            await Promise.all([
+                loadJobDescription(url),
+                analyzeWithClaude(url, apiKey)
+            ]);
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Analyze Job Description';
         });
 
         async function loadJobDescription(url) {
-            // Show result section with loading state
-            result.classList.add('show');
             urlDisplay.textContent = url;
             openLink.href = url;
 
@@ -256,7 +469,6 @@
             `;
 
             try {
-                // Use a CORS proxy to fetch the content
                 const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
                 const response = await fetch(proxyUrl);
 
@@ -266,18 +478,137 @@
 
                 const data = await response.json();
 
-                // Display the content in an iframe with srcdoc
                 contentContainer.innerHTML = `
                     <iframe
-                        style="width: 100%; height: 600px; border: none;"
+                        style="width: 100%; height: 400px; border: none;"
                         sandbox="allow-same-origin allow-scripts"
                         srcdoc="${escapeHtml(data.contents)}">
                     </iframe>
                 `;
             } catch (error) {
-                showError('Failed to load the job description. Try opening it in a new tab instead.');
+                contentContainer.innerHTML = `
+                    <div style="padding: 20px; color: #dc3545;">
+                        Failed to load job description preview. You can still open it in a new tab.
+                    </div>
+                `;
                 console.error('Error:', error);
             }
+        }
+
+        async function analyzeWithClaude(url, apiKey) {
+            analysisContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing with Claude AI...</p>
+                </div>
+            `;
+
+            try {
+                // First, fetch the job description content
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch job description');
+                }
+
+                const data = await response.json();
+                const jobContent = stripHtml(data.contents);
+
+                // Call Claude API
+                const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-3-5-sonnet-20241022',
+                        max_tokens: 2048,
+                        messages: [{
+                            role: 'user',
+                            content: `Analyze this job description and break down the ATS (Applicant Tracking System) requirements. Provide:
+
+1. **Key Requirements**: List the must-have skills, experience, and qualifications
+2. **Keywords to Include**: Important keywords and phrases that should appear in a resume
+3. **Nice-to-Haves**: Preferred but not required qualifications
+4. **Red Flags to Avoid**: Things that might get filtered out by ATS
+5. **Application Tips**: Specific advice for this role
+
+Job Description:
+${jobContent.substring(0, 15000)}
+
+Format your response in clear sections with bullet points.`
+                        }]
+                    })
+                });
+
+                if (!claudeResponse.ok) {
+                    const errorData = await claudeResponse.json();
+                    throw new Error(errorData.error?.message || 'Claude API request failed');
+                }
+
+                const claudeData = await claudeResponse.json();
+                const analysis = claudeData.content[0].text;
+
+                displayAnalysis(analysis);
+            } catch (error) {
+                analysisContent.innerHTML = `
+                    <div style="color: #dc3545; padding: 20px;">
+                        <strong>Error:</strong> ${error.message}
+                        <br><br>
+                        Please check your API key and try again.
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        }
+
+        function displayAnalysis(analysis) {
+            // Convert markdown-style analysis to HTML
+            const sections = analysis.split(/\n(?=\d+\.|#{1,3}\s|\*\*)/);
+            let html = '';
+
+            sections.forEach(section => {
+                if (section.trim()) {
+                    // Clean up the section
+                    const cleanSection = section.trim();
+
+                    // Check if it's a header
+                    if (/^\d+\./.test(cleanSection) || /^#{1,3}\s/.test(cleanSection) || /^\*\*[^*]+\*\*:/.test(cleanSection)) {
+                        const title = cleanSection.split(/[::\n]/)[0].replace(/^\d+\.\s*|\*\*|#{1,3}\s/g, '').trim();
+                        const content = cleanSection.split(/[::\n]/).slice(1).join('\n').trim();
+
+                        html += `<div class="analysis-section">`;
+                        html += `<h3>${title}</h3>`;
+                        html += `<ul>`;
+
+                        // Split content into bullet points
+                        const bullets = content.split(/\n[-•*]\s+/).filter(b => b.trim());
+                        bullets.forEach(bullet => {
+                            const cleanBullet = bullet.replace(/\*\*/g, '').trim();
+                            if (cleanBullet) {
+                                html += `<li>${cleanBullet}</li>`;
+                            }
+                        });
+
+                        html += `</ul></div>`;
+                    }
+                }
+            });
+
+            if (!html) {
+                html = `<div class="analysis-section"><pre style="white-space: pre-wrap; font-family: inherit;">${analysis}</pre></div>`;
+            }
+
+            analysisContent.innerHTML = html;
+        }
+
+        function stripHtml(html) {
+            const tmp = document.createElement('DIV');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
         }
 
         function escapeHtml(text) {
@@ -292,10 +623,13 @@
         function showError(message) {
             errorDiv.textContent = message;
             errorDiv.classList.add('show');
-            result.classList.remove('show');
         }
 
         // Clear error on input
+        apiKeyInput.addEventListener('input', function() {
+            errorDiv.classList.remove('show');
+        });
+
         urlInput.addEventListener('input', function() {
             errorDiv.classList.remove('show');
         });
